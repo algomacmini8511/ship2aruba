@@ -1,23 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Package, Truck, AlertCircle, CheckCircle, ArrowRight, FileUp } from 'lucide-react';
+import { Package, Truck, AlertCircle, CheckCircle, ArrowRight, FileUp, Loader } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
 const ClientDashboard = () => {
   const [packages, setPackages] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
     const fetchPackages = async () => {
       try {
+        setLoading(true);
         const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/packages/my`, {
           headers: { Authorization: `Bearer ${user.token}` }
         });
         setPackages(data);
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchPackages();
@@ -43,12 +47,20 @@ const ClientDashboard = () => {
         <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Welcome to your Ship2Aruba suite: <strong>{user.suiteNumber}</strong></p>
       </div>
 
-      {/* Actionable Steps for Client */}
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '40vh', color: 'var(--primary)' }}>
+          <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+            <Loader size={48} />
+          </motion.div>
+        </div>
+      ) : (
+        <>
+          {/* Actionable Steps for Client */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '3rem' }}>
-        <motion.div 
+        <motion.div
           whileHover={{ y: -5 }}
           onClick={() => navigate('/client/packages')}
-          className="glass-card" 
+          className="glass-card"
           style={{ borderLeft: '6px solid var(--warning)', cursor: 'pointer' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
@@ -61,10 +73,10 @@ const ClientDashboard = () => {
           <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.5rem' }}>Click to upload bills for these packages.</p>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           whileHover={{ y: -5 }}
           onClick={() => navigate('/client/packages')}
-          className="glass-card" 
+          className="glass-card"
           style={{ borderLeft: '6px solid var(--success)', cursor: 'pointer' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
@@ -84,7 +96,7 @@ const ClientDashboard = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
           {/* Connector Line */}
           <div style={{ position: 'absolute', top: '20px', left: '10%', right: '10%', height: '2px', background: 'var(--border)', zIndex: 0 }}></div>
-          
+
           {steps.map((step, i) => (
             <div key={step.name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', zIndex: 1, width: '15%' }}>
               <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--surface)', border: '2px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
@@ -109,6 +121,8 @@ const ClientDashboard = () => {
           <p>United States</p>
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 };

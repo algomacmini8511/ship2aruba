@@ -10,7 +10,8 @@ import {
   AlertCircle,
   X,
   ChevronRight,
-  Eye
+  Eye,
+  Loader
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -18,29 +19,44 @@ const ClientPackages = () => {
   const [packages, setPackages] = useState([]);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [uploadError, setUploadError] = useState('');
 
   const user = JSON.parse(localStorage.getItem('user'));
 
-  const fetchData = async () => {
+  const fetchData = async (isInitial = false) => {
     try {
+      if (isInitial) setLoading(true);
       const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/packages/my`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setPackages(data);
     } catch (err) {
       console.error(err);
+    } finally {
+      if (isInitial) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 5000); // More responsive 5s refresh
+    fetchData(true);
+    const interval = setInterval(() => fetchData(false), 5000); // More responsive 5s refresh
     return () => clearInterval(interval);
   }, []);
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    setUploadError(''); // Clear previous errors
+    const validExtensions = ['jpeg', 'jpg', 'png', 'pdf'];
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    
+    if (!validExtensions.includes(fileExtension)) {
+      setUploadError('Invalid file! Only JPEG, JPG, PNG, and PDF are allowed.');
+      e.target.value = ''; // Reset file input
+      return;
+    }
 
     const formData = new FormData();
     formData.append('invoice', file);
@@ -54,6 +70,7 @@ const ClientPackages = () => {
         }
       });
       setSelectedPackage(null); // Close modal first
+      setUploadError(''); // Clear error on success
       toast.success('Invoice uploaded successfully!');
       await fetchData();
     } catch (err) {
@@ -90,6 +107,13 @@ const ClientPackages = () => {
         <p style={{ color: 'var(--text-muted)' }}>Follow your packages from US warehouse to Aruba.</p>
       </div>
 
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1, color: 'var(--primary)' }}>
+          <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+            <Loader size={48} />
+          </motion.div>
+        </div>
+      ) : (
       <div style={{ display: 'flex', gap: '1rem', flex: 1, overflowX: 'auto', paddingBottom: '1rem' }}>
         {columns.map((col) => (
           <div key={col.title} style={{
@@ -141,7 +165,7 @@ const ClientPackages = () => {
                       <span style={{ fontWeight: '700', fontSize: '0.9rem' }}>{pkg.trackingNumber}</span>
                       {pkg.status === 'Needs Review' && <AlertCircle size={14} color="var(--danger)" />}
                     </div>
-                    <Eye size={14} color="var(--text-muted)" style={{ opacity: 0.6, cursor: 'pointer' }} onClick={() => setSelectedPackage(pkg)} />
+                    {col.title === 'Needs Action' && <Eye size={14} color="var(--text-muted)" style={{ opacity: 0.6, cursor: 'pointer' }} onClick={() => setSelectedPackage(pkg)} />}
                   </div>
                   <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>{pkg.contents}</p>
 
@@ -169,6 +193,7 @@ const ClientPackages = () => {
           </div>
         ))}
       </div>
+      )}
 
       {/* Simple Upload Modal */}
       <AnimatePresence>
@@ -177,11 +202,11 @@ const ClientPackages = () => {
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="glass" style={{ width: '400px', padding: '2rem', textAlign: 'center' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <h2 style={{ fontSize: '1.25rem', margin: 0 }}>Upload Bill / Invoice</h2>
-                <button onClick={() => setSelectedPackage(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                <button onClick={() => { setSelectedPackage(null); setUploadError(''); }} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
                   <X size={20} />
                 </button>
               </div>
-              
+
               <div style={{ marginBottom: '1.5rem' }}>
                 <div style={{ background: 'rgba(99, 102, 241, 0.1)', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', color: 'var(--primary)' }}>
                   <FileUp size={30} />
@@ -192,6 +217,13 @@ const ClientPackages = () => {
               {selectedPackage.status === 'Needs Review' && (
                 <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1.5rem', fontSize: '0.8rem' }}>
                   <strong>Admin Note:</strong> {selectedPackage.invoice?.adminNotes}
+                </div>
+              )}
+
+              {uploadError && (
+                <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1.5rem', fontSize: '0.8rem' }}>
+                  <AlertCircle size={16} style={{ display: 'inline', marginBottom: '-3px', marginRight: '5px' }} />
+                  <strong>Error:</strong> {uploadError}
                 </div>
               )}
 
@@ -207,9 +239,9 @@ const ClientPackages = () => {
               <label htmlFor="file-upload" className="btn btn-primary" style={{ display: 'block', cursor: 'pointer', background: uploading ? 'var(--text-muted)' : 'var(--primary)', padding: '1rem', opacity: uploading ? 0.7 : 1 }}>
                 {uploading ? 'Processing & Uploading...' : 'Choose File & Upload'}
               </label>
-              
+
               {!uploading && (
-                <button className="btn-outline" style={{ border: 'none', marginTop: '1rem' }} onClick={() => setSelectedPackage(null)}>
+                <button className="btn-outline" style={{ border: 'none', marginTop: '1rem' }} onClick={() => { setSelectedPackage(null); setUploadError(''); }}>
                   Cancel
                 </button>
               )}

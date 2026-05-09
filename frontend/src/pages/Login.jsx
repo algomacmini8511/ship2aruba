@@ -32,10 +32,10 @@ const Login = () => {
 
   return (
     <div className="login-page" style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle at top right, #1e293b, #0f172a)' }}>
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass" 
+        className="glass"
         style={{ width: '100%', maxWidth: '400px', padding: '2.5rem' }}
       >
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -51,9 +51,9 @@ const Login = () => {
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <label style={{ fontSize: '0.875rem', fontWeight: '500', color: 'var(--text-muted)' }}>Email Address</label>
-            <input 
-              type="email" 
-              placeholder="admin@ship2aruba.com" 
+            <input
+              type="email"
+              placeholder="admin@ship2aruba.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -61,9 +61,9 @@ const Login = () => {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <label style={{ fontSize: '0.875rem', fontWeight: '500', color: 'var(--text-muted)' }}>Password</label>
-            <input 
-              type="password" 
-              placeholder="••••••••" 
+            <input
+              type="password"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

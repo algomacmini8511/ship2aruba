@@ -26,7 +26,13 @@ const AdminDashboard = () => {
     fetchData();
   }, []);
 
-  if (!stats) return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading dashboard...</div>;
+  if (!stats) return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', color: 'var(--primary)' }}>
+      <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+        <Package size={48} />
+      </motion.div>
+    </div>
+  );
 
   const statCards = [
     { name: 'Total Packages', value: stats.totalPackages, icon: <Package size={24} />, color: 'var(--primary)' },
@@ -63,7 +69,7 @@ const AdminDashboard = () => {
       {/* Stats Grid */}
       <div className="grid-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
         {statCards.map((stat, i) => (
-          <motion.div 
+          <motion.div
             key={stat.name}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}

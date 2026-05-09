@@ -1,21 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Users, Mail, Hash, Package } from 'lucide-react';
+import { Users, Mail, Hash, Package, Loader } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const AdminClients = () => {
   const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(true);
   const user = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
     const fetchClients = async () => {
       try {
+        setLoading(true);
         const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/clients`, {
           headers: { Authorization: `Bearer ${user.token}` }
         });
         setClients(data);
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchClients();
@@ -28,9 +32,16 @@ const AdminClients = () => {
         <p style={{ color: 'var(--text-muted)' }}>Manage your client database and their suites.</p>
       </div>
 
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '5rem', color: 'var(--primary)' }}>
+          <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+            <Loader size={48} />
+          </motion.div>
+        </div>
+      ) : (
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
         {clients.map((client) => (
-          <motion.div 
+          <motion.div
             key={client._id}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -61,6 +72,7 @@ const AdminClients = () => {
           </motion.div>
         ))}
       </div>
+      )}
     </div>
   );
 };

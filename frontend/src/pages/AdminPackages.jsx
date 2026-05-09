@@ -10,7 +10,8 @@ import {
   Truck,
   Package as PackageIcon,
   ChevronRight,
-  AlertCircle
+  AlertCircle,
+  Loader
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -18,13 +19,14 @@ import toast from 'react-hot-toast';
 const AdminPackages = () => {
   const [packages, setPackages] = useState([]);
   const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showIntake, setShowIntake] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [reviewNote, setReviewNote] = useState('');
   const [filterClientId, setFilterClientId] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filterSearch, setFilterSearch] = useState('');
-  
+
   const [formData, setFormData] = useState({
     trackingNumber: '',
     dimensions: { width: '', height: '', length: '' },
@@ -48,8 +50,9 @@ const AdminPackages = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (isInitial = false) => {
     try {
+      if (isInitial) setLoading(true);
       const [pkgRes, clientRes] = await Promise.all([
         axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/packages`, { headers: { Authorization: `Bearer ${user.token}` } }),
         axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/clients`, { headers: { Authorization: `Bearer ${user.token}` } })
@@ -58,12 +61,14 @@ const AdminPackages = () => {
       setClients(clientRes.data);
     } catch (err) {
       console.error(err);
+    } finally {
+      if (isInitial) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 5000); // More responsive 5s refresh
+    fetchData(true);
+    const interval = setInterval(() => fetchData(false), 5000); // More responsive 5s refresh
     return () => clearInterval(interval);
   }, []);
 
@@ -104,12 +109,12 @@ const AdminPackages = () => {
     { title: 'Completed', status: ['Shipped', 'Delivered'], color: '#94a3b8', icon: <ChevronRight size={18} />, guide: 'Finished and sent' }
   ];
 
-  const filteredPackages = filterClientId 
+  const filteredPackages = filterClientId
     ? packages.filter(p => p.client?._id === filterClientId)
     : packages;
 
-  const filteredClients = clients.filter(c => 
-    c.name.toLowerCase().includes(filterSearch.toLowerCase()) || 
+  const filteredClients = clients.filter(c =>
+    c.name.toLowerCase().includes(filterSearch.toLowerCase()) ||
     c.suiteNumber.toLowerCase().includes(filterSearch.toLowerCase())
   );
 
@@ -123,12 +128,12 @@ const AdminPackages = () => {
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           {/* Custom Searchable Dropdown */}
           <div ref={dropdownRef} style={{ position: 'relative', width: '250px' }}>
-            <div 
+            <div
               onClick={() => setIsFilterOpen(!isFilterOpen)}
               className="glass"
-              style={{ 
-                padding: '0.75rem 1rem', 
-                borderRadius: '0.75rem', 
+              style={{
+                padding: '0.75rem 1rem',
+                borderRadius: '0.75rem',
                 cursor: 'pointer',
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -148,12 +153,12 @@ const AdminPackages = () => {
 
             <AnimatePresence>
               {isFilterOpen && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
                   className="glass"
-                  style={{ 
+                  style={{
                     position: 'absolute',
                     top: 'calc(100% + 0.5rem)',
                     left: 0,
@@ -165,25 +170,25 @@ const AdminPackages = () => {
                     padding: '0.5rem'
                   }}
                 >
-                  <input 
+                  <input
                     autoFocus
                     placeholder="Search client..."
                     value={filterSearch}
                     onChange={(e) => setFilterSearch(e.target.value)}
                     onClick={(e) => e.stopPropagation()}
-                    style={{ 
-                      width: '100%', 
-                      background: 'rgba(255,255,255,0.05)', 
-                      border: 'none', 
-                      padding: '0.6rem', 
-                      fontSize: '0.8rem', 
+                    style={{
+                      width: '100%',
+                      background: 'rgba(255,255,255,0.05)',
+                      border: 'none',
+                      padding: '0.6rem',
+                      fontSize: '0.8rem',
                       borderRadius: '0.5rem',
                       marginBottom: '0.5rem',
                       outline: 'none'
                     }}
                   />
                   <div className="custom-scroll" style={{ maxHeight: '250px', overflowY: 'auto', paddingRight: '2px' }}>
-                    <div 
+                    <div
                       onClick={() => { setFilterClientId(''); setIsFilterOpen(false); setFilterSearch(''); }}
                       style={{ padding: '0.6rem 1rem', fontSize: '0.85rem', cursor: 'pointer', borderRadius: '0.5rem', background: !filterClientId ? 'rgba(99, 102, 241, 0.1)' : 'transparent', marginBottom: '2px' }}
                       className="hover-bg"
@@ -191,13 +196,13 @@ const AdminPackages = () => {
                       All Clients
                     </div>
                     {filteredClients.map(c => (
-                      <div 
+                      <div
                         key={c._id}
                         onClick={() => { setFilterClientId(c._id); setIsFilterOpen(false); setFilterSearch(''); }}
-                        style={{ 
-                          padding: '0.6rem 1rem', 
-                          fontSize: '0.85rem', 
-                          cursor: 'pointer', 
+                        style={{
+                          padding: '0.6rem 1rem',
+                          fontSize: '0.85rem',
+                          cursor: 'pointer',
                           borderRadius: '0.5rem',
                           background: filterClientId === c._id ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
                           display: 'flex',
@@ -222,6 +227,13 @@ const AdminPackages = () => {
         </div>
       </div>
 
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1, color: 'var(--primary)' }}>
+          <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+            <Loader size={48} />
+          </motion.div>
+        </div>
+      ) : (
       <div style={{ display: 'flex', gap: '1rem', flex: 1, overflowX: 'auto', paddingBottom: '1rem' }}>
         {columns.map((col) => (
           <div key={col.title} style={{
@@ -274,7 +286,7 @@ const AdminPackages = () => {
                       <span style={{ fontWeight: '700', fontSize: '0.9rem' }}>{pkg.trackingNumber}</span>
                       {pkg.status === 'Needs Review' && <AlertCircle size={14} color="var(--danger)" />}
                     </div>
-                    <Eye size={14} color="var(--text-muted)" style={{ opacity: 0.6 }} />
+                    {col.title === 'New Packages' && <Eye size={14} color="var(--text-muted)" style={{ opacity: 0.6 }} />}
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
                     <div style={{ fontWeight: '600', color: 'var(--text)' }}>{pkg.client?.name}</div>
@@ -294,8 +306,8 @@ const AdminPackages = () => {
                   )}
 
                   {pkg.status === 'Ship Requested' && (
-                    <button 
-                      className="btn btn-primary" 
+                    <button
+                      className="btn btn-primary"
                       style={{ width: '100%', fontSize: '0.85rem', marginTop: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: 'var(--accent)' }}
                       onClick={async (e) => {
                         e.stopPropagation(); // Don't open modal
@@ -319,6 +331,7 @@ const AdminPackages = () => {
           </div>
         ))}
       </div>
+      )}
 
       {/* Modals same as before but styled for simplicity */}
       <AnimatePresence>
@@ -366,7 +379,10 @@ const AdminPackages = () => {
                 </div>
 
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                  <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => setShowIntake(false)}>Cancel</button>
+                  <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => {
+                    setShowIntake(false);
+                    setFormData({ trackingNumber: '', dimensions: { width: '', height: '', length: '' }, weight: '', contents: '', client: '' });
+                  }}>Cancel</button>
                   <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Save Package</button>
                 </div>
               </form>

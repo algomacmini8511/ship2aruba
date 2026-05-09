@@ -9,7 +9,8 @@ import {
   Check,
   X,
   Eye,
-  AlertCircle
+  AlertCircle,
+  Loader
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -18,6 +19,7 @@ const AdminExtreme = () => {
   const [packages, setPackages] = useState([]);
   const [clients, setClients] = useState([]);
   const [showIntake, setShowIntake] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [reviewNote, setReviewNote] = useState('');
   
@@ -31,8 +33,9 @@ const AdminExtreme = () => {
     client: ''
   });
 
-  const fetchData = async () => {
+  const fetchData = async (isInitial = false) => {
     try {
+      if (isInitial) setLoading(true);
       const [pkgRes, clientRes] = await Promise.all([
         axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/packages`, { headers: { Authorization: `Bearer ${user.token}` } }),
         axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/clients`, { headers: { Authorization: `Bearer ${user.token}` } })
@@ -41,12 +44,14 @@ const AdminExtreme = () => {
       setClients(clientRes.data);
     } catch (err) {
       console.error(err);
+    } finally {
+      if (isInitial) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 10000); // Fast refresh
+    fetchData(true);
+    const interval = setInterval(() => fetchData(false), 10000); // Fast refresh
     return () => clearInterval(interval);
   }, []);
 
@@ -72,7 +77,7 @@ const AdminExtreme = () => {
       setShowIntake(false);
       fetchData();
       setFormData({ trackingNumber: '', dimensions: { width: '', height: '', length: '' }, weight: '', contents: '', client: '' });
-    } catch (err) { toast.error('Error saving package'); }
+    } catch (err) { toast.error(err.response?.data?.message || 'Error saving package'); }
   };
 
   // Group by simplified actions
@@ -89,7 +94,13 @@ const AdminExtreme = () => {
         </button>
       </div>
 
-      {/* GIANT ACTION BUTTONS */}
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', color: 'var(--primary)' }}>
+          <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+            <Loader size={48} />
+          </motion.div>
+        </div>
+      ) : (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', maxWidth: '800px', margin: '0 auto' }}>
         
         {/* ACTION 1: ADD NEW */}
@@ -157,6 +168,7 @@ const AdminExtreme = () => {
         </div>
 
       </div>
+      )}
 
       {/* INTAKE MODAL - SUPER CLEAN */}
       <AnimatePresence>
@@ -179,7 +191,10 @@ const AdminExtreme = () => {
                 <input placeholder="Weight (lbs)" type="number" value={formData.weight} onChange={(e) => setFormData({...formData, weight: e.target.value})} style={{ padding: '1rem' }} />
                 
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                  <button type="button" className="btn btn-outline" style={{ flex: 1, padding: '1rem' }} onClick={() => setShowIntake(false)}>Cancel</button>
+                  <button type="button" className="btn btn-outline" style={{ flex: 1, padding: '1rem' }} onClick={() => {
+                    setShowIntake(false);
+                    setFormData({ trackingNumber: '', dimensions: { width: '', height: '', length: '' }, weight: '', contents: '', client: '' });
+                  }}>Cancel</button>
                   <button type="submit" className="btn btn-primary" style={{ flex: 1, padding: '1rem', background: 'var(--primary)', fontWeight: '800' }}>SAVE BOX</button>
                 </div>
               </form>
