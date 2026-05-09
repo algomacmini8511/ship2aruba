@@ -12,7 +12,7 @@ const ClientDashboard = () => {
   useEffect(() => {
     const fetchPackages = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/packages/my', {
+        const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/packages/my`, {
           headers: { Authorization: `Bearer ${user.token}` }
         });
         setPackages(data);

@@ -34,8 +34,8 @@ const AdminExtreme = () => {
   const fetchData = async () => {
     try {
       const [pkgRes, clientRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/packages', { headers: { Authorization: `Bearer ${user.token}` } }),
-        axios.get('http://localhost:5000/api/clients', { headers: { Authorization: `Bearer ${user.token}` } })
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/packages`, { headers: { Authorization: `Bearer ${user.token}` } }),
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/clients`, { headers: { Authorization: `Bearer ${user.token}` } })
       ]);
       setPackages(pkgRes.data);
       setClients(clientRes.data);
@@ -53,9 +53,9 @@ const AdminExtreme = () => {
   const handleAction = async (pkgId, status, note = '') => {
     try {
       if (status === 'Shipped') {
-        await axios.put(`http://localhost:5000/api/packages/${pkgId}/status`, { status }, { headers: { Authorization: `Bearer ${user.token}` } });
+        await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/packages/${pkgId}/status`, { status }, { headers: { Authorization: `Bearer ${user.token}` } });
       } else {
-        await axios.put(`http://localhost:5000/api/packages/${pkgId}/review`, { status, adminNotes: note }, { headers: { Authorization: `Bearer ${user.token}` } });
+        await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/packages/${pkgId}/review`, { status, adminNotes: note }, { headers: { Authorization: `Bearer ${user.token}` } });
       }
       toast.success('Action successful');
       setSelectedPackage(null);
@@ -67,7 +67,7 @@ const AdminExtreme = () => {
   const handleIntake = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/packages', formData, { headers: { Authorization: `Bearer ${user.token}` } });
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/packages`, formData, { headers: { Authorization: `Bearer ${user.token}` } });
       toast.success('Package saved successfully!');
       setShowIntake(false);
       fetchData();
@@ -204,7 +204,7 @@ const AdminExtreme = () => {
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>CLIENT</p>
                 <p style={{ fontSize: '1.2rem', fontWeight: '700' }}>{selectedPackage.client?.name}</p>
                 <p style={{ marginTop: '1rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>BILL FILE</p>
-                <a href={`http://localhost:5000${selectedPackage.invoice?.filePath}`} target="_blank" className="btn btn-primary" style={{ display: 'inline-flex', gap: '0.5rem', marginTop: '0.5rem', background: '#fff', color: '#000' }}>
+                <a href={`${import.meta.env.VITE_BACKEND_URL}${selectedPackage.invoice?.filePath}`} target="_blank" className="btn btn-primary" style={{ display: 'inline-flex', gap: '0.5rem', marginTop: '0.5rem', background: '#fff', color: '#000' }}>
                   <Eye size={18} /> OPEN BILL PHOTO
                 </a>
               </div>

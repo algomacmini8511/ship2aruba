@@ -10,7 +10,7 @@ const AdminShipRequests = () => {
 
   const fetchRequests = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/ship-requests', {
+      const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/ship-requests`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setRequests(data);
@@ -25,7 +25,7 @@ const AdminShipRequests = () => {
 
   const handleProcess = async (id) => {
     try {
-      await axios.put(`http://localhost:5000/api/ship-requests/${id}/process`, {}, {
+      await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/ship-requests/${id}/process`, {}, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Shipment processed successfully!');

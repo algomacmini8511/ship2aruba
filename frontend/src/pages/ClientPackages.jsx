@@ -23,7 +23,7 @@ const ClientPackages = () => {
 
   const fetchData = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/packages/my', {
+      const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/packages/my`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setPackages(data);
@@ -47,7 +47,7 @@ const ClientPackages = () => {
 
     setUploading(true);
     try {
-      await axios.put(`http://localhost:5000/api/packages/${selectedPackage._id}/invoice`, formData, {
+      await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/packages/${selectedPackage._id}/invoice`, formData, {
         headers: {
           Authorization: `Bearer ${user.token}`,
           'Content-Type': 'multipart/form-data'
@@ -65,7 +65,7 @@ const ClientPackages = () => {
 
   const handleShipRequest = async (pkgId) => {
     try {
-      await axios.post('http://localhost:5000/api/ship-requests', {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/ship-requests`, {
         packageIds: [pkgId],
         notes: 'Requested from board'
       }, { headers: { Authorization: `Bearer ${user.token}` } });

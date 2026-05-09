@@ -10,7 +10,7 @@ const AdminClients = () => {
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/clients', {
+        const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/clients`, {
           headers: { Authorization: `Bearer ${user.token}` }
         });
         setClients(data);

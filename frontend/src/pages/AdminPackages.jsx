@@ -25,6 +25,14 @@ const AdminPackages = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filterSearch, setFilterSearch] = useState('');
   
+  const [formData, setFormData] = useState({
+    trackingNumber: '',
+    dimensions: { width: '', height: '', length: '' },
+    weight: '',
+    contents: '',
+    client: ''
+  });
+
   const dropdownRef = useRef(null);
 
   const user = JSON.parse(localStorage.getItem('user'));
@@ -43,8 +51,8 @@ const AdminPackages = () => {
   const fetchData = async () => {
     try {
       const [pkgRes, clientRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/packages', { headers: { Authorization: `Bearer ${user.token}` } }),
-        axios.get('http://localhost:5000/api/clients', { headers: { Authorization: `Bearer ${user.token}` } })
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/packages`, { headers: { Authorization: `Bearer ${user.token}` } }),
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/clients`, { headers: { Authorization: `Bearer ${user.token}` } })
       ]);
       setPackages(pkgRes.data);
       setClients(clientRes.data);
@@ -62,7 +70,7 @@ const AdminPackages = () => {
   const handleIntake = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/packages', formData, {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/packages`, formData, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Package saved successfully!');
@@ -76,7 +84,7 @@ const AdminPackages = () => {
 
   const handleReview = async (status) => {
     try {
-      await axios.put(`http://localhost:5000/api/packages/${selectedPackage._id}/review`, {
+      await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/packages/${selectedPackage._id}/review`, {
         status, adminNotes: reviewNote
       }, { headers: { Authorization: `Bearer ${user.token}` } });
       toast.success(`Package ${status}`);
@@ -292,7 +300,7 @@ const AdminPackages = () => {
                       onClick={async (e) => {
                         e.stopPropagation(); // Don't open modal
                         try {
-                          await axios.put(`http://localhost:5000/api/packages/${pkg._id}/status`, {
+                          await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/packages/${pkg._id}/status`, {
                             status: 'Shipped'
                           }, { headers: { Authorization: `Bearer ${user.token}` } });
                           toast.success(`Package ${pkg.trackingNumber} Shipped!`);
@@ -394,7 +402,7 @@ const AdminPackages = () => {
                   <div style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem' }}>
                     <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Invoice</p>
                     {selectedPackage.invoice?.filePath ?
-                      <a href={`http://localhost:5000${selectedPackage.invoice.filePath}`} target="_blank" className="btn btn-outline" style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', marginTop: '0.4rem' }}>View Invoice</a>
+                      <a href={`${import.meta.env.VITE_BACKEND_URL}${selectedPackage.invoice.filePath}`} target="_blank" className="btn btn-outline" style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', marginTop: '0.4rem' }}>View Invoice</a>
                       : <p style={{ fontSize: '0.8rem' }}>Not Uploaded</p>
                     }
                   </div>
@@ -418,7 +426,7 @@ const AdminPackages = () => {
                   <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>This package is ready to go to Aruba. Click below to finish.</p>
                   <button className="btn btn-primary" style={{ width: '100%', background: 'var(--accent)' }} onClick={async () => {
                     try {
-                      await axios.put(`http://localhost:5000/api/packages/${selectedPackage._id}/status`, {
+                      await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/packages/${selectedPackage._id}/status`, {
                         status: 'Shipped'
                       }, { headers: { Authorization: `Bearer ${user.token}` } });
                       toast.success('Package marked as Shipped!');

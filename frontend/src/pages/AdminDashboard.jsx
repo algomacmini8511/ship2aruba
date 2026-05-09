@@ -14,8 +14,8 @@ const AdminDashboard = () => {
     const fetchData = async () => {
       try {
         const [statsRes, pkgRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/clients/stats', { headers: { Authorization: `Bearer ${user.token}` } }),
-          axios.get('http://localhost:5000/api/packages', { headers: { Authorization: `Bearer ${user.token}` } })
+          axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/clients/stats`, { headers: { Authorization: `Bearer ${user.token}` } }),
+          axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/packages`, { headers: { Authorization: `Bearer ${user.token}` } })
         ]);
         setStats(statsRes.data);
         setRecentPackages(pkgRes.data.slice(0, 5)); // Get last 5 packages
