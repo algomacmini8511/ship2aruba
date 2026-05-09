@@ -52,6 +52,9 @@ router.post('/', protect, admin, async (req, res) => {
     await logStatus(pkg._id, null, pkg.status, req.user._id);
     res.status(201).json(pkg);
   } catch (error) {
+    if (error.code === 11000 || (error.message && error.message.includes('E11000'))) {
+      return res.status(400).json({ message: 'Package with this tracking number already exists.' });
+    }
     res.status(400).json({ message: error.message });
   }
 });
