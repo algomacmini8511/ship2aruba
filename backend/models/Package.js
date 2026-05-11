@@ -29,7 +29,8 @@ const packageSchema = new mongoose.Schema({
     filePath: String,
     uploadDate: Date,
     adminNotes: String
-  }
+  },
+  shipRequest: { type: mongoose.Schema.Types.ObjectId, ref: 'ShipRequest' }
 }, { timestamps: true });
 
 export default mongoose.model('Package', packageSchema);

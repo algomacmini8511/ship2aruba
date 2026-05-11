@@ -42,7 +42,8 @@ const App = () => {
             <Layout role="admin" />
           </ProtectedRoute>
         }>
-          <Route index element={<AdminDashboard />} />
+          <Route index element={<Navigate to="packages" replace />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="packages" element={<AdminPackages />} />
           <Route path="ship-requests" element={<AdminShipRequests />} />
           <Route path="clients" element={<AdminClients />} />
@@ -54,11 +55,12 @@ const App = () => {
             <Layout role="client" />
           </ProtectedRoute>
         }>
-          <Route index element={<ClientDashboard />} />
+          <Route index element={<Navigate to="packages" replace />} />
+          <Route path="dashboard" element={<ClientDashboard />} />
           <Route path="packages" element={<ClientPackages />} />
         </Route>
 
-        <Route path="/" element={<Navigate to={user ? (user.role === 'admin' ? '/admin' : '/client') : '/login'} />} />
+        <Route path="/" element={<Navigate to={user ? (user.role === 'admin' ? '/admin/packages' : '/client/packages') : '/login'} />} />
       </Routes>
     </Router>
   );

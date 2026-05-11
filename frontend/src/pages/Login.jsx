@@ -4,15 +4,19 @@ import axios from 'axios';
 import { Package, Shield, User as UserIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import Button from '../components/Button';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError('');
     try {
       const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/login`, { email, password });
       localStorage.setItem('user', JSON.stringify(data));
@@ -27,6 +31,8 @@ const Login = () => {
       const msg = err.response?.data?.message || 'Login failed';
       setError(msg);
       toast.error(msg);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -69,9 +75,13 @@ const Login = () => {
               required
             />
           </div>
-          <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem' }}>
+          <Button 
+            type="submit" 
+            loading={isLoading} 
+            style={{ marginTop: '0.5rem' }}
+          >
             Sign In
-          </button>
+          </Button>
         </form>
 
         <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'center', gap: '1.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>

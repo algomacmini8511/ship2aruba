@@ -54,22 +54,29 @@ const AdminShipRequests = () => {
           </motion.div>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '900px' }}>
           {requests.map((req) => (
             <motion.div
               key={req._id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
               className="glass-card"
+              style={{ padding: '2rem' }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ padding: '0.75rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '0.75rem', color: 'var(--primary)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <div style={{ padding: '0.75rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '1rem', color: 'var(--primary)', height: 'fit-content' }}>
                     <Truck size={24} />
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '1.125rem' }}>Request from {req.client?.name}</h3>
-                    <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Submitted on {new Date(req.dateSubmitted).toLocaleDateString()}</p>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.25rem' }}>Ship Request</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+                      <span style={{ color: 'var(--primary)', fontWeight: '600' }}>{req.client?.name}</span>
+                      <span>•</span>
+                      <span>Suite {req.client?.suiteNumber}</span>
+                      <span>•</span>
+                      <span>{new Date(req.dateSubmitted).toLocaleDateString()}</span>
+                    </div>
                   </div>
                 </div>
                 <div>
@@ -79,25 +86,33 @@ const AdminShipRequests = () => {
                 </div>
               </div>
 
-              <div style={{ marginBottom: '1.5rem' }}>
-                <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '700', marginBottom: '0.75rem' }}>Included Packages</p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+              <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '1.5rem', borderRadius: '1rem', marginBottom: '1.5rem' }}>
+                <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '800', marginBottom: '1rem', letterSpacing: '0.05em' }}>
+                  Included Packages ({req.packages.length})
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '0.75rem' }}>
                   {req.packages.map(pkg => (
-                    <div key={pkg._id} style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '0.75rem', borderRadius: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <Package size={14} color="var(--text-muted)" />
-                      <span style={{ fontSize: '0.875rem' }}>{pkg.trackingNumber}</span>
+                    <div key={pkg._id} style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <div style={{ padding: '0.4rem', background: 'rgba(255,255,255,0.05)', borderRadius: '0.5rem' }}>
+                        <Package size={14} color="var(--primary)" />
+                      </div>
+                      <div style={{ overflow: 'hidden' }}>
+                        <p style={{ fontSize: '0.875rem', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pkg.trackingNumber}</p>
+                        <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{pkg.weight} lbs • {pkg.status}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
 
               {req.status === 'Ship Requested' && (
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
                   <button
                     className="btn btn-primary"
+                    style={{ padding: '0.75rem 2rem', fontWeight: '700' }}
                     onClick={() => handleProcess(req._id)}
                   >
-                    <CheckCircle size={18} /> Mark as Shipped
+                    <CheckCircle size={18} /> Mark as Processed & Shipped
                   </button>
                 </div>
               )}
@@ -105,8 +120,9 @@ const AdminShipRequests = () => {
           ))}
 
           {requests.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '5rem', color: 'var(--text-muted)' }}>
-              No ship requests found.
+            <div style={{ textAlign: 'center', padding: '5rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.02)', borderRadius: '1.5rem', border: '1px dashed var(--border)' }}>
+              <Truck size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+              <p>No ship requests found.</p>
             </div>
           )}
         </div>

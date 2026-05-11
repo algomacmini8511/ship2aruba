@@ -1,21 +1,23 @@
 import React from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Package, 
-  Truck, 
-  Users, 
-  LogOut, 
+import {
+  LayoutDashboard,
+  Package,
+  Truck,
+  Users,
+  LogOut,
   ChevronRight,
   Bell,
   Menu,
   ChevronLeft
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Layout = ({ role }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = React.useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = React.useState(false);
   const user = JSON.parse(localStorage.getItem('user'));
 
   const handleLogout = () => {
@@ -25,14 +27,14 @@ const Layout = ({ role }) => {
   };
 
   const adminMenu = [
-    { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/admin' },
+    { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/admin/dashboard' },
     { name: 'Work Board', icon: <Package size={20} />, path: '/admin/packages' },
     { name: 'Ship Requests', icon: <Truck size={20} />, path: '/admin/ship-requests' },
     { name: 'Clients', icon: <Users size={20} />, path: '/admin/clients' },
   ];
 
   const clientMenu = [
-    { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/client' },
+    { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/client/dashboard' },
     { name: 'My Packages', icon: <Package size={20} />, path: '/client/packages' },
   ];
 
@@ -42,19 +44,19 @@ const Layout = ({ role }) => {
     <div className="app-container">
       {/* Sidebar */}
       {/* Sidebar */}
-      <aside style={{ 
-        width: isCollapsed ? '80px' : '280px', 
-        background: 'var(--surface)', 
-        borderRight: '1px solid var(--border)', 
-        display: 'flex', 
+      <aside style={{
+        width: isCollapsed ? '80px' : '280px',
+        background: 'var(--surface)',
+        borderRight: '1px solid var(--border)',
+        display: 'flex',
         flexDirection: 'column',
         transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         position: 'relative'
       }}>
-        <div style={{ 
-          padding: isCollapsed ? '1.5rem 0' : '2rem', 
-          display: 'flex', 
-          alignItems: 'center', 
+        <div style={{
+          padding: isCollapsed ? '1.5rem 0' : '2rem',
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: isCollapsed ? 'center' : 'flex-start',
           gap: '0.75rem',
           overflow: 'hidden'
@@ -67,8 +69,8 @@ const Layout = ({ role }) => {
 
         <nav style={{ flex: 1, padding: '0 0.75rem' }}>
           {menu.map((item) => (
-            <Link 
-              key={item.path} 
+            <Link
+              key={item.path}
               to={item.path}
               title={isCollapsed ? item.name : ''}
               style={{
@@ -94,25 +96,25 @@ const Layout = ({ role }) => {
         </nav>
 
         <div style={{ padding: '1rem', borderTop: '1px solid var(--border)' }}>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
             justifyContent: isCollapsed ? 'center' : 'flex-start',
-            gap: '0.75rem', 
-            marginBottom: '1rem', 
+            gap: '0.75rem',
+            marginBottom: '1rem',
             padding: '0.5rem',
             overflow: 'hidden'
           }}>
-            <div style={{ 
-              width: '40px', 
-              height: '40px', 
-              borderRadius: '50%', 
-              background: 'linear-gradient(135deg, var(--primary), var(--accent))', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, var(--primary), var(--accent))',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               fontWeight: '700',
-              flexShrink: 0 
+              flexShrink: 0
             }}>
               {user?.name?.[0]}
             </div>
@@ -123,18 +125,18 @@ const Layout = ({ role }) => {
               </div>
             )}
           </div>
-          <button 
-            onClick={handleLogout}
+          <button
+            onClick={() => setShowLogoutConfirm(true)}
             title={isCollapsed ? 'Logout' : ''}
-            style={{ 
-              width: '100%', 
-              display: 'flex', 
-              alignItems: 'center', 
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: isCollapsed ? 'center' : 'flex-start',
-              gap: '0.75rem', 
-              padding: '0.75rem', 
-              borderRadius: '0.75rem', 
-              background: 'rgba(239, 68, 68, 0.1)', 
+              gap: '0.75rem',
+              padding: '0.75rem',
+              borderRadius: '0.75rem',
+              background: 'rgba(239, 68, 68, 0.1)',
               color: 'var(--danger)',
               fontWeight: '600',
               fontSize: '0.875rem',
@@ -148,24 +150,53 @@ const Layout = ({ role }) => {
         </div>
       </aside>
 
+      {/* Logout Confirmation Modal */}
+      <AnimatePresence>
+        {showLogoutConfirm && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="glass" style={{ width: '400px', padding: '2rem', textAlign: 'center' }}>
+              <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                <LogOut size={30} />
+              </div>
+              <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Are you sure?</h2>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>You will need to login again to access your account.</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <button
+                  onClick={() => setShowLogoutConfirm(false)}
+                  style={{ padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', cursor: 'pointer', fontWeight: '600' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleLogout}
+                  style={{ padding: '0.75rem', borderRadius: '0.75rem', border: 'none', background: 'var(--danger)', color: 'white', cursor: 'pointer', fontWeight: '600' }}
+                >
+                  Yes, Logout
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Main Area */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
-        <header style={{ 
-          height: '70px', 
-          borderBottom: '1px solid var(--border)', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between', 
-          padding: '0 2rem', 
-          background: 'var(--background)' 
+        <header style={{
+          height: '70px',
+          borderBottom: '1px solid var(--border)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 2rem',
+          background: 'var(--background)'
         }}>
-          <button 
+          <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            style={{ 
-              background: 'var(--surface)', 
+            style={{
+              background: 'var(--surface)',
               border: '1px solid var(--border)',
-              padding: '0.5rem', 
-              borderRadius: '0.5rem', 
+              padding: '0.5rem',
+              borderRadius: '0.5rem',
               color: 'var(--text)',
               cursor: 'pointer',
               display: 'flex',
@@ -183,7 +214,7 @@ const Layout = ({ role }) => {
             </button>
           </div>
         </header>
-        <div className="main-content">
+        <div className="main-content" style={{ overflowY: 'auto', height: 'calc(100vh - 70px)' }}>
           <Outlet />
         </div>
       </main>

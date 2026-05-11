@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Users, Mail, Hash, Package, Loader } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Button from '../components/Button';
 
 const AdminClients = () => {
   const [clients, setClients] = useState([]);
@@ -67,7 +68,7 @@ const AdminClients = () => {
             </div>
 
             <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
-              <button className="btn btn-outline" style={{ width: '100%', fontSize: '0.875rem' }}>View Profile</button>
+              <Button variant="outline" style={{ width: '100%', fontSize: '0.875rem' }}>View Profile</Button>
             </div>
           </motion.div>
         ))}

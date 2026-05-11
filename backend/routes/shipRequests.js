@@ -48,13 +48,17 @@ router.post('/', protect, async (req, res) => {
       client: req.user._id,
       packages: packageIds
     });
+    const shipRequestId = shipRequest._id;
+    
+    // Atomically update all packages
+    await Package.updateMany(
+      { _id: { $in: packageIds } },
+      { $set: { status: 'Ship Requested', shipRequest: shipRequestId } }
+    );
 
-    // Update package statuses
+    // Log history for each (this can be slightly delayed/async)
     for (const pkg of packages) {
-      const oldStatus = pkg.status;
-      pkg.status = 'Ship Requested';
-      await pkg.save();
-      await logStatus(pkg._id, oldStatus, 'Ship Requested', req.user._id);
+      await logStatus(pkg._id, pkg.status, 'Ship Requested', req.user._id);
     }
 
     res.status(201).json(shipRequest);

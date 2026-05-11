@@ -63,7 +63,10 @@ router.post('/', protect, admin, async (req, res) => {
 // @route   GET /api/packages
 // @access  Admin
 router.get('/', protect, admin, async (req, res) => {
-  const packages = await Package.find({}).populate('client', 'name email suiteNumber').sort('-createdAt');
+  const packages = await Package.find({})
+    .populate('client', 'name email suiteNumber')
+    .populate('shipRequest')
+    .sort('-createdAt');
   res.json(packages);
 });
 
@@ -71,7 +74,9 @@ router.get('/', protect, admin, async (req, res) => {
 // @route   GET /api/packages/my
 // @access  Client
 router.get('/my', protect, async (req, res) => {
-  const packages = await Package.find({ client: req.user._id }).sort('-createdAt');
+  const packages = await Package.find({ client: req.user._id })
+    .populate('shipRequest')
+    .sort('-createdAt');
   res.json(packages);
 });
 

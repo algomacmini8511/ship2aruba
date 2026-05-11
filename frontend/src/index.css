@@ -80,6 +80,7 @@ select:focus {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
   border-radius: 1rem;
+  position: relative; /* Anchor for tooltips */
 }
 
 .glass-card {
@@ -89,6 +90,7 @@ select:focus {
   border-radius: 1rem;
   padding: 1.5rem;
   transition: transform 0.2s ease, background 0.2s ease;
+  position: relative; /* Anchor for tooltips */
 }
 
 .glass-card:hover {
@@ -184,6 +186,26 @@ select:focus {
   border-color: var(--text-muted);
 }
 
+.btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .badge {
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
@@ -252,4 +274,64 @@ td {
 
 tr:hover td {
   background: rgba(255, 255, 255, 0.02);
+}
+
+/* Tooltip System */
+.tooltip-container {
+  display: inline-flex;
+  align-items: center;
+  cursor: help;
+}
+
+.tooltip-container:hover {
+  z-index: 100;
+}
+
+.tooltip-content {
+  position: absolute;
+  top: 2.5rem; /* Position below the tracking number/icon row */
+  left: 1rem;
+  right: 1rem;
+  background: #1e293b;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  z-index: 9999;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  text-align: left;
+  line-height: 1.6;
+  border-top: 4px solid var(--danger);
+}
+
+.tooltip-content::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 2.5rem; /* Align with the icon position in the card */
+  border-width: 8px;
+  border-style: solid;
+  border-color: transparent transparent var(--danger) transparent;
+}
+
+.tooltip-container:hover .tooltip-content {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.tooltip-header {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--danger);
+  font-weight: 800;
+  margin-bottom: 0.4rem;
+  display: block;
 }
